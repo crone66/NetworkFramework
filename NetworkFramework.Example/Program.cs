@@ -8,10 +8,11 @@ namespace NetworkFramework.Example
         {
             ServerTcp server = new ServerTcp();
             ClientTcp client = new ClientTcp();
+            client.Send("hello server im a new tcp client");
 
             ServerUdp udpServer = new ServerUdp();
             ClientUdp udpClient = new ClientUdp();
-            udpClient.Send();
+            udpClient.Send("hello server im a new udp client");
 
             Console.ReadKey();
         }

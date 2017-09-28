@@ -23,7 +23,7 @@ namespace NetworkFramework.Example
         private async void Server_OnMessageReceived(object sender, UDPMessageArgs e)
         {
             Console.WriteLine("[UDPServer] Message Received from: " + e.Remote.Address.ToString() + ":" + e.Remote.Port.ToString());
-            Console.WriteLine("[UDPServer] Message: " + Encoding.ASCII.GetString(e.Message));
+            Console.WriteLine("[UDPServer] Message: " + Encoding.ASCII.GetString(e.Message).Trim());
 
             await server.SendAsync(e.Remote, Encoding.ASCII.GetBytes("this is my server response"));
         }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NetworkFramework.Example
 {
@@ -17,12 +17,17 @@ namespace NetworkFramework.Example
             client.OnException += Client_OnException;
             client.OnReceivedMessage += Client_OnReceivedMessage;
             client.Start();
-            client.SendAsync(Encoding.ASCII.GetBytes("Hello Im a new client"));
         }
 
+        public async void Send(string msg)
+        {
+            await client.SendAsync(Encoding.ASCII.GetBytes(msg));
+        }
+
+        List<byte> l = new List<byte>();
         private void Client_OnReceivedMessage(object sender, MessageArgs e)
         {
-            Console.WriteLine("[TCPClient] Received message from Server: " + Encoding.ASCII.GetString(e.Message));
+            Console.WriteLine("[TCPClient] Received message from Server: " + Encoding.ASCII.GetString(e.Message).Trim());
         }
 
         private void Client_OnException(object sender, ConnectionErrorArgs e)

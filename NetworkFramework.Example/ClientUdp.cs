@@ -15,14 +15,14 @@ namespace NetworkFramework.Example
             client.Start();
         }
 
-        public async void Send()
+        public async void Send(string msg)
         {
-            await client.SendAsync(Encoding.ASCII.GetBytes("hello server im a new client"));
+            await client.SendAsync(Encoding.ASCII.GetBytes(msg));
         }
 
         private void Client_OnMessageReceived(object sender, UDPMessageArgs e)
         {
-            Console.WriteLine("[UDPClient] Received message from server: " + Encoding.ASCII.GetString(e.Message));
+            Console.WriteLine("[UDPClient] Received message from server: " + Encoding.ASCII.GetString(e.Message).Trim());
         }
 
         private void Client_OnException(object sender, ConnectionErrorArgs e)

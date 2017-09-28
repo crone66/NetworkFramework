@@ -19,14 +19,14 @@ namespace NetworkFramework.Example
             listener.Start();
         }
 
-        private void Listener_OnConnectionAccepted(object sender, NewConnectionArgs e)
+        private async void Listener_OnConnectionAccepted(object sender, NewConnectionArgs e)
         {
             Console.WriteLine("[TCPServer] New client connected");
             SimpleTcpClient newClient = new SimpleTcpClient(1024, e.Client);
             newClient.OnException += NewClient_OnException;
             newClient.OnReceivedMessage += NewClient_OnReceivedMessage;
             newClient.Start();
-            newClient.SendAsync(Encoding.ASCII.GetBytes("Hello I'm your server :D"));
+            await newClient.SendAsync(Encoding.ASCII.GetBytes("Hello I'm your server :D"));
             connectedClients.Add(newClient);
         }
 
@@ -34,7 +34,7 @@ namespace NetworkFramework.Example
         {
             SimpleTcpClient senderClient = sender as SimpleTcpClient;
             Console.WriteLine("[TCPServer] New message received from: " + senderClient.Remote.Address.ToString() + ":" + senderClient.Remote.Port.ToString());
-            Console.WriteLine("[TCPServer] message: " + Encoding.ASCII.GetString(e.Message));
+            Console.WriteLine("[TCPServer] message: " + Encoding.ASCII.GetString(e.Message).Trim());
         }
 
         private void Listener_OnException(object sender, ConnectionErrorArgs e)
