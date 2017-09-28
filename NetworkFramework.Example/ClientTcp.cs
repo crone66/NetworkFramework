@@ -1,6 +1,9 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 26.09.2017
+ */
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text;
 

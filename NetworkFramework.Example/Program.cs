@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 26.09.2017
+ * Purpose: UDP and TCP examples for the NetworkFramework
+ */
+using System;
 
 namespace NetworkFramework.Example
 {

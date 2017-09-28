@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 26.09.2017
+ */
+using System;
 using System.Net;
 using System.Text;
 
