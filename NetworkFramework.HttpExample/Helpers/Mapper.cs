@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 28.09.2017
+ */
+using System;
 using System.Collections.Generic;
 
 namespace NetworkFramework.HttpExample
@@ -40,6 +44,11 @@ namespace NetworkFramework.HttpExample
             {"pdf", "application/pdf"}
         };
 
+        /// <summary>
+        /// Maps file extension to mime type
+        /// </summary>
+        /// <param name="ext">File extension</param>
+        /// <returns>Mime Type</returns>
         public static string GetContentType(string ext)
         {
             if (ext[0] == '.')
@@ -51,7 +60,11 @@ namespace NetworkFramework.HttpExample
                 return fileFormatMapping["default"];
         }
 
-
+        /// <summary>
+        /// Converts a methode string to MethodeType
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public static MethodeType GetMethodeType(string text)
         {
             if (Enum.TryParse(text, out MethodeType type))
@@ -61,11 +74,21 @@ namespace NetworkFramework.HttpExample
             return MethodeType.NONE;
         }
 
+        /// <summary>
+        /// Converts MethodeType to string
+        /// </summary>
+        /// <param name="type">Methode type</param>
+        /// <returns></returns>
         public static string GetMethodeType(MethodeType type)
         {
             return nameof(type);
         }
 
+        /// <summary>
+        /// Accept-Encoding parser, Converts result to EncodingType
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public static EncodingType GetEncoding(string text)
         {
             EncodingType res = EncodingType.NONE;
@@ -80,6 +103,11 @@ namespace NetworkFramework.HttpExample
             return res;
         }
 
+        /// <summary>
+        /// Converts EncodingType to string
+        /// </summary>
+        /// <param name="type">Encoding type</param>
+        /// <returns></returns>
         public static string GetEncoding(EncodingType type)
         {
             return nameof(type).ToLower();

@@ -1,5 +1,12 @@
-﻿namespace NetworkFramework.HttpExample
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 28.09.2017
+ */
+namespace NetworkFramework.HttpExample
 {
+    /// <summary>
+    /// Stores a parsed http request
+    /// </summary>
     public struct RequestInfo
     {
         public MethodeType Methode;

@@ -1,9 +1,16 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 28.09.2017
+ */
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace NetworkFramework.HttpExample
 {
+    /// <summary>
+    /// stores http response values
+    /// </summary>
     public struct ResponseInfo
     {
         public string HttpVersion;
@@ -31,6 +38,11 @@ namespace NetworkFramework.HttpExample
             ContentEncoding = contentEncoding;
         }
 
+        /// <summary>
+        /// Creates a http response
+        /// </summary>
+        /// <param name="lf">Line feed character (LF=char10)</param>
+        /// <returns>Http response as byte array</returns>
         public byte[] CreateResponse(char lf)
         {
             StringBuilder sb = new StringBuilder();
@@ -66,6 +78,7 @@ namespace NetworkFramework.HttpExample
 
             sb.Append(lf);
 
+            //Setup final byte array
             List<byte> data = new List<byte>();
             data.AddRange(Encoding.ASCII.GetBytes(sb.ToString()));
             data.AddRange(Content);

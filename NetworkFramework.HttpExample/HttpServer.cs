@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 28.09.2017
+ */
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -6,6 +10,9 @@ using System.Text;
 
 namespace NetworkFramework.HttpExample
 {
+    /// <summary>
+    /// Http server example with support of all common file types (including application, audio, video, image, script and text file types) 
+    /// </summary>
     public class HttpServer
     {
         private const string notFoundPath = "/ErrorCodes/404.html";
@@ -49,11 +56,15 @@ namespace NetworkFramework.HttpExample
             RequestInfo info = ParseRequest(Encoding.ASCII.GetString(e.Message));
             HandleRequest(senderClient, info);
 
-
             Console.WriteLine("[TCPServer] New message received from: " + senderClient.Remote.Address.ToString() + ":" + senderClient.Remote.Port.ToString());
             Console.WriteLine("[TCPServer] message: " + Encoding.ASCII.GetString(e.Message));
         }
 
+        /// <summary>
+        /// Handles http requests and sends a response
+        /// </summary>
+        /// <param name="client">Tcp client</param>
+        /// <param name="info">Request info</param>
         private async void HandleRequest(SimpleTcpClient client, RequestInfo info)
         {
             if(info.Methode == MethodeType.GET)
@@ -109,6 +120,11 @@ namespace NetworkFramework.HttpExample
                 client.Stop();
         }
 
+        /// <summary>
+        /// Predefined error code response for code 404 and 405
+        /// </summary>
+        /// <param name="code">Error code</param>
+        /// <returns></returns>
         private ResponseInfo GetErrorResponse(int code)
         {
             if (code == 405)
@@ -135,9 +151,15 @@ namespace NetworkFramework.HttpExample
                 return new ResponseInfo("1.1", "404", "Not Found", modifyDate.ToUniversalTime().ToString(), "de", "text/html", data, false, "utf-8", null);
             }
             else
-                throw new NotImplementedException();          
+                throw new NotImplementedException("Unknown error code!");          
         }
 
+        #region RequestParsing
+        /// <summary>
+        /// Parses http requests
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         private RequestInfo ParseRequest(string request)
         {
             string[] lines = request.Split('\n');
@@ -160,6 +182,11 @@ namespace NetworkFramework.HttpExample
             return info;
         }
 
+        /// <summary>
+        /// Prases methode of http requests
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private RequestInfo GetMethode(string line)
         {
             string[] words = line.Split(' ');
@@ -179,6 +206,13 @@ namespace NetworkFramework.HttpExample
             return default(RequestInfo); 
         }
 
+        /// <summary>
+        /// Universal parsing function for http header fields
+        /// </summary>
+        /// <param name="lines">Request lines</param>
+        /// <param name="varName">Field name</param>
+        /// <param name="value">result value</param>
+        /// <returns></returns>
         private bool ParseVars(string[] lines, string varName, out string value)
         {
             for (int i = 0; i < lines.Length; i++)
@@ -193,7 +227,9 @@ namespace NetworkFramework.HttpExample
             value = null;
             return false;
         }
+        #endregion
 
+        #region ConsoleOutput
         private void Listener_OnException(object sender, ConnectionErrorArgs e)
         {
             Console.WriteLine("[TCPServer] Error: " + e.Error.Message);
@@ -213,5 +249,6 @@ namespace NetworkFramework.HttpExample
         {
             Console.WriteLine("[TCPServer] client disconnected.");
         }
+        #endregion
     }
 }

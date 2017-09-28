@@ -1,10 +1,19 @@
-﻿using System.IO;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 28.09.2017
+ */
+using System.IO;
 using System.IO.Compression;
 
 namespace NetworkFramework.HttpExample
 {
     public static class Compressions
     {
+        /// <summary>
+        /// Gzip compression
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>compressed data</returns>
         public static byte[] GZip(byte[] data)
         {
             using (MemoryStream output = new MemoryStream())
@@ -17,6 +26,11 @@ namespace NetworkFramework.HttpExample
             }
         }
 
+        /// <summary>
+        /// Deflate compression
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>compressed data</returns>
         public static byte[] Deflate(byte[] data)
         {
             using (MemoryStream output = new MemoryStream())
