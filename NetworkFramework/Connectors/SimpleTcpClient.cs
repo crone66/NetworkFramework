@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace NetworkFramework
 {
@@ -14,6 +15,7 @@ namespace NetworkFramework
 
         public event EventHandler<MessageArgs> OnReceivedMessage;
         public event EventHandler<ConnectionErrorArgs> OnException;
+        public event EventHandler OnDisconnect;
 
         public IPEndPoint Remote
         {
@@ -89,19 +91,23 @@ namespace NetworkFramework
                 }
                 client = null;
                 stream = null;
+                OnDisconnect?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public async void SendAsync(byte[] message)
+        public async Task<bool> SendAsync(byte[] message)
         {
             try
             {
                 if(active && stream.CanWrite)
                     await stream.WriteAsync(message, 0, message.Length);
+
+                return true;
             }
             catch(Exception ex)
             {
                 OnException?.Invoke(this, new ConnectionErrorArgs(ex, false));
+                return false;
             }
         }
 
