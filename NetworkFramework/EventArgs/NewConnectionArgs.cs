@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 25.09.2017
+ */
+using System;
 using System.Net.Sockets;
 
 namespace NetworkFramework

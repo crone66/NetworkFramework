@@ -1,9 +1,16 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 25.09.2017
+ */
+using System;
 using System.Net;
 using System.Net.Sockets;
 
 namespace NetworkFramework
 {
+    /// <summary>
+    /// Tcp listener
+    /// </summary>
     public class TcpServerListener
     {
         private bool active;
@@ -18,6 +25,11 @@ namespace NetworkFramework
             this.localEndPoint = localEndPoint;
         }
 
+        /// <summary>
+        /// Starts listening on a given local end point
+        /// </summary>
+        /// <param name="localEndPoint"></param>
+        /// <returns></returns>
         public bool Start(IPEndPoint localEndPoint = null)
         {
             if (!active)
@@ -59,6 +71,9 @@ namespace NetworkFramework
             return false;
         }
 
+        /// <summary>
+        /// Stops listening
+        /// </summary>
         public void Stop()
         {
             if(active)
@@ -74,6 +89,9 @@ namespace NetworkFramework
             }
         }
 
+        /// <summary>
+        /// Listening methode calls itself when a new client was accepted
+        /// </summary>
         private async void Listen()
         {
             try

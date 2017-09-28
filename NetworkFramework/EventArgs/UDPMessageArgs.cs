@@ -1,5 +1,8 @@
-﻿using System.Net;
-
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 25.09.2017
+ */
+using System.Net;
 
 namespace NetworkFramework
 {

@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 25.09.2017
+ */
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -39,6 +43,11 @@ namespace NetworkFramework
             this.client = client;
         }
 
+        /// <summary>
+        /// Starts connection to a remote endpoint.
+        /// </summary>
+        /// <param name="remoteEndPoint">Remote endpoint</param>
+        /// <returns>Returns true on success</returns>
         public bool Start(IPEndPoint remoteEndPoint = null)
         {
             if (!active)
@@ -76,6 +85,9 @@ namespace NetworkFramework
             return false;
         }
 
+        /// <summary>
+        /// Stop the client and closes all streams (Can cause exceptions)
+        /// </summary>
         public void Stop()
         {
             if (active)
@@ -95,6 +107,11 @@ namespace NetworkFramework
             }
         }
 
+        /// <summary>
+        /// Sends a message to a connected remote client
+        /// </summary>
+        /// <param name="message">Message as byte array</param>
+        /// <returns>Returns true on success. (Indicates only that the message was successfully loaded into the network buffer!)</returns>
         public async Task<bool> SendAsync(byte[] message)
         {
             try
@@ -111,6 +128,9 @@ namespace NetworkFramework
             }
         }
 
+        /// <summary>
+        /// Receiver methode runs in a async thread and calls it self when a message was received
+        /// </summary>
         private async void ReceiveAsync()
         {
             try

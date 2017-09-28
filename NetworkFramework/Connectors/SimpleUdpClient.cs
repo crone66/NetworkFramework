@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Author: Marcel Croonenbroeck
+ * Date: 25.09.2017
+ */
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -27,6 +31,10 @@ namespace NetworkFramework
             this.listenEndPoint = listenEndPoint;
         }
 
+        /// <summary>
+        /// Starts Receiver
+        /// </summary>
+        /// <returns></returns>
         public bool Start()
         {
             if (!active)
@@ -49,6 +57,9 @@ namespace NetworkFramework
             return false;
         }
 
+        /// <summary>
+        /// Stops Receiver
+        /// </summary>
         public void Stop()
         {
             if (active)
@@ -65,6 +76,11 @@ namespace NetworkFramework
             }
         }
 
+        /// <summary>
+        /// Send a message to server 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task<bool> SendAsync(byte[] message)
         {
             if(receiver != null && remoteEndPoint != null)
@@ -75,6 +91,12 @@ namespace NetworkFramework
             return false;
         }
 
+        /// <summary>
+        /// Sends a message to given remote endpoint
+        /// </summary>
+        /// <param name="remoteEndPoint"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task<bool> SendAsync(IPEndPoint remoteEndPoint, byte[] message)
         {
             if (receiver != null)
@@ -85,6 +107,9 @@ namespace NetworkFramework
             return false;
         }
 
+        /// <summary>
+        /// Receives udp messages and calls itself again
+        /// </summary>
         private async void ReadAsync()
         {
             UdpReceiveResult result = await receiver.ReceiveAsync();
