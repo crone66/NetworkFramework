@@ -102,15 +102,5 @@ namespace NetworkFramework.HttpExample
             }
             return res;
         }
-
-        /// <summary>
-        /// Converts EncodingType to string
-        /// </summary>
-        /// <param name="type">Encoding type</param>
-        /// <returns></returns>
-        public static string GetEncoding(EncodingType type)
-        {
-            return nameof(type).ToLower();
-        }
     }
 }

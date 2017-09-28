@@ -45,6 +45,7 @@
     <Compile Include="Enums\EncodingType.cs" />
     <Compile Include="Enums\MethodeType.cs" />
     <Compile Include="Helpers\Compressions.cs" />
+    <Compile Include="Helpers\HttpConfig.cs" />
     <Compile Include="Helpers\Mapper.cs" />
     <Compile Include="Helpers\RequestInfo.cs" />
     <Compile Include="Helpers\ResponseInfo.cs" />

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace NetworkFramework.HttpExample
 {
@@ -15,12 +16,8 @@ namespace NetworkFramework.HttpExample
     /// </summary>
     public class HttpServer
     {
-        private const string notFoundPath = "/ErrorCodes/404.html";
-        private const string notNotAllowedPath = "/ErrorCodes/405.html";
-        private const string defaultCharset = "utf-8";
-        private const string rootDir = "/root";
-       
-
+        private const string configFile = "httpConfig.xml";
+        private HttpConfig config;
         private string rootFullPath;
 
         private char lf = (char)10;
@@ -30,9 +27,20 @@ namespace NetworkFramework.HttpExample
 
         public HttpServer()
         {
-            rootFullPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + rootDir;
+            try
+            {
+                config = ReadConfig(configFile);
+            }
+            catch
+            {
+                config = new HttpConfig("127.0.0.1", 80, "/ErrorCodes/404.html", "/ErrorCodes/405.html", "utf-8", "/root");
+                WriteConfig(configFile, config);
+            }
+
+            rootFullPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + config.RootDir;
             connectedClients = new List<SimpleTcpClient>();
-            listener = new TcpServerListener(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80));
+
+            listener = new TcpServerListener(new IPEndPoint(IPAddress.Parse(config.LocalIP), config.Port));
             listener.OnConnectionAccepted += Listener_OnConnectionAccepted;
             listener.OnException += Listener_OnException;
             listener.Start();
@@ -81,21 +89,21 @@ namespace NetworkFramework.HttpExample
                     if (type.StartsWith("text")) //text encoding
                     {
                         string data = File.ReadAllText(fullPath);
-                        content = Encoding.GetEncoding(defaultCharset).GetBytes(data);
+                        content = Encoding.GetEncoding(config.DefaultCharset).GetBytes(data);
                         encoding = null;
-                        charset = defaultCharset;
+                        charset = config.DefaultCharset;
                     }
                     else //byte encoding
                     {
                         if(info.Encoding.HasFlag(EncodingType.GZIP))
                         {
                             content = Compressions.GZip(File.ReadAllBytes(fullPath));
-                            encoding = Mapper.GetEncoding(EncodingType.GZIP);
+                            encoding = "gzip";
                         }
                         else if(info.Encoding.HasFlag(EncodingType.DEFLATE))
                         {
                             content = Compressions.Deflate(File.ReadAllBytes(fullPath));
-                            encoding = Mapper.GetEncoding(EncodingType.DEFLATE);
+                            encoding = "deflate";
                         }
                         else
                         {
@@ -130,25 +138,25 @@ namespace NetworkFramework.HttpExample
             if (code == 405)
             {
                 byte[] data = null;
-                if (File.Exists(rootFullPath + notNotAllowedPath))
+                if (File.Exists(rootFullPath + config.NotAllowedPath))
                 {
-                    string text = File.ReadAllText(rootFullPath + notNotAllowedPath);
+                    string text = File.ReadAllText(rootFullPath + config.NotAllowedPath);
                     data = Encoding.UTF8.GetBytes(text);
                 }
-                return new ResponseInfo("1.1", "405", "Method Not Allowed", null, "de", "text/html", data, false, "utf-8", null);
+                return new ResponseInfo("1.1", "405", "Method Not Allowed", null, "de", "text/html", data, false, config.DefaultCharset, null);
             }
             else if (code == 404)
             {
                 byte[] data = null;
                 DateTime modifyDate = DateTime.Now;
-                if (File.Exists(rootFullPath + notFoundPath))
+                if (File.Exists(rootFullPath + config.NotFoundPath))
                 {
-                    string text = File.ReadAllText(rootFullPath + notFoundPath);
+                    string text = File.ReadAllText(rootFullPath + config.NotFoundPath);
                     data = Encoding.UTF8.GetBytes(text);
-                    modifyDate = File.GetLastWriteTime(rootFullPath + notFoundPath);
+                    modifyDate = File.GetLastWriteTime(rootFullPath + config.NotFoundPath);
                 }
 
-                return new ResponseInfo("1.1", "404", "Not Found", modifyDate.ToUniversalTime().ToString(), "de", "text/html", data, false, "utf-8", null);
+                return new ResponseInfo("1.1", "404", "Not Found", modifyDate.ToUniversalTime().ToString(), "de", "text/html", data, false, config.DefaultCharset, null);
             }
             else
                 throw new NotImplementedException("Unknown error code!");          
@@ -247,8 +255,29 @@ namespace NetworkFramework.HttpExample
 
         private void NewClient_OnDisconnect(object sender, EventArgs e)
         {
+            if(sender != null && sender is SimpleTcpClient && connectedClients != null)
+                connectedClients.Remove(sender as SimpleTcpClient);
+
             Console.WriteLine("[TCPServer] client disconnected.");
         }
         #endregion
+
+        private HttpConfig ReadConfig(string path)
+        {
+            XmlSerializer xml = new XmlSerializer(typeof(HttpConfig));
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+            {
+                return (HttpConfig)xml.Deserialize(fs);
+            }
+        }
+
+        private void WriteConfig(string path, HttpConfig config)
+        {
+            XmlSerializer xml = new XmlSerializer(typeof(HttpConfig));
+            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                xml.Serialize(fs, config);
+            }
+        }
     }
 }
