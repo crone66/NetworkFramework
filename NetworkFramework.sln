@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkFramework", "Network
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkFramework.Example", "NetworkFramework.Example\NetworkFramework.Example.csproj", "{BBBD1286-BB4D-4BE2-A298-D87BAEF4F404}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkFramework.HttpExample", "NetworkFramework.HttpExample\NetworkFramework.HttpExample.csproj", "{1C9FB325-38F1-4B8B-AA21-81AFD4D060D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BBBD1286-BB4D-4BE2-A298-D87BAEF4F404}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBBD1286-BB4D-4BE2-A298-D87BAEF4F404}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBBD1286-BB4D-4BE2-A298-D87BAEF4F404}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C9FB325-38F1-4B8B-AA21-81AFD4D060D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C9FB325-38F1-4B8B-AA21-81AFD4D060D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C9FB325-38F1-4B8B-AA21-81AFD4D060D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C9FB325-38F1-4B8B-AA21-81AFD4D060D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
