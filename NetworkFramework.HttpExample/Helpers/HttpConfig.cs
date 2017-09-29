@@ -8,8 +8,9 @@
         public string NotAllowedPath; //405
         public string DefaultCharset;
         public string RootDir;
+        public string FastCGIPath;
 
-        public HttpConfig(string localIP, int port, string notFoundPath, string notAllowedPath, string defaultCharset, string rootDir)
+        public HttpConfig(string localIP, int port, string notFoundPath, string notAllowedPath, string defaultCharset, string rootDir, string fastCGIPath)
         {
             LocalIP = localIP;
             Port = port;
@@ -17,6 +18,7 @@
             NotAllowedPath = notAllowedPath;
             DefaultCharset = defaultCharset;
             RootDir = rootDir;
+            FastCGIPath = fastCGIPath;
         }
     }
 }
