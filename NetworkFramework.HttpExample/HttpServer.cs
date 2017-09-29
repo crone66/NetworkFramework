@@ -33,7 +33,7 @@ namespace NetworkFramework.HttpExample
             }
             catch
             {
-                config = new HttpConfig("127.0.0.1", 80, "/ErrorCodes/404.html", "/ErrorCodes/405.html", "utf-8", "/root");
+                config = new HttpConfig("127.0.0.1", 80, "/ErrorCodes/404.html", "/ErrorCodes/405.html", "utf-8", "/root", "");
                 WriteConfig(configFile, config);
             }
 
@@ -111,8 +111,11 @@ namespace NetworkFramework.HttpExample
                         }
                     }
 
+                    int fullLength = content.Length;
+                    content = DoRangeManipulation(content, info.StartRange, info.EndRange);
+
                     ResponseInfo response = new ResponseInfo("1.1", "200", "OK", modifiedTime.ToString(), null, type, content, info.KeepAlive, charset, encoding);
-                    await client.SendAsync(response.CreateResponse(lf));
+                    await client.SendAsync(response.CreateResponse(lf, fullLength, info.StartRange, info.EndRange));
                 }
                 else
                 {
@@ -126,6 +129,37 @@ namespace NetworkFramework.HttpExample
 
             if(!info.KeepAlive)
                 client.Stop();
+        }
+
+        /// <summary>
+        /// Shrinks the byte array to a specific size
+        /// </summary>
+        /// <param name="content">Byte array</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="endIndex">End index</param>
+        /// <returns></returns>
+        private byte[] DoRangeManipulation(byte[] content, int startIndex, int endIndex)
+        {
+            if (startIndex > -1 || endIndex > -1)
+            {
+                int length;
+                if (startIndex < 0)
+                    startIndex = 0;
+
+                if (endIndex < 0)
+                {
+                    endIndex = content.Length;
+                    length = content.Length - startIndex;
+                }
+                else
+                    length = endIndex - startIndex;
+
+                byte[] finalContent = new byte[length];
+                Array.Copy(content, startIndex, finalContent, 0, length);
+
+                return finalContent;
+            }
+            return content;
         }
 
         /// <summary>
@@ -182,9 +216,23 @@ namespace NetworkFramework.HttpExample
                 info.HttpVersion = version;
 
             if(ParseVars(lines, "Accept-Encoding", out string text))
-            {
                 info.Encoding = Mapper.GetEncoding(text);
+
+            if(ParseVars(lines, "Range", out string length))
+            {
+                string minMax = length.Split('=')[1];
+                int seperatorIndex = minMax.IndexOf('-');
+                string min = minMax.Substring(0, seperatorIndex);
+                string max = minMax.Substring(seperatorIndex + 1);
+
+                if (int.TryParse(min, out int start))
+                    info.StartRange = start;
+
+                if (int.TryParse(max, out int end))
+                    info.EndRange = end;
             }
+
+
 
 
             return info;

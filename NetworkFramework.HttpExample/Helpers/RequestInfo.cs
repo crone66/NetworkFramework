@@ -15,6 +15,9 @@ namespace NetworkFramework.HttpExample
         public string Content;
         public string Host;
         public bool KeepAlive;
+        public int StartRange;
+        public int EndRange;
+
         public RequestInfo(MethodeType methode, string content, string host, bool keepAlive, string httpVersion, EncodingType encoding)
         {
             Methode = methode;
@@ -23,6 +26,8 @@ namespace NetworkFramework.HttpExample
             Host = host;
             KeepAlive = keepAlive;
             Encoding = encoding;
+            StartRange = -1;
+            EndRange = -1;
         }
     }
 }

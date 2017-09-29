@@ -43,7 +43,7 @@ namespace NetworkFramework.HttpExample
         /// </summary>
         /// <param name="lf">Line feed character (LF=char10)</param>
         /// <returns>Http response as byte array</returns>
-        public byte[] CreateResponse(char lf)
+        public byte[] CreateResponse(char lf, int orginalLength = -1, int startIndex = -1, int endIndex = -1)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(string.Format("HTTP/{0} {1} {2}{3}", HttpVersion, StatusCode, StatusName, lf));
@@ -74,6 +74,24 @@ namespace NetworkFramework.HttpExample
             if (Content != null)
                 sb.Append(string.Format("Content-Length: {0}{1}", Content.Length, lf));
 
+            if(startIndex > -1 || endIndex > -1)
+            {
+                string startValue = "";
+                if (startIndex > -1)
+                    startValue = startIndex.ToString();
+
+                string endValue = "";
+                if (endIndex > -1)
+                    endValue = endIndex.ToString();
+
+                string length = "";
+                if (orginalLength == -1) //live stream
+                    length = "*";
+                else
+                    length = orginalLength.ToString();
+
+                sb.Append(string.Format("Content-Range: {0}-{1}/{2}{3}", startValue, endValue, length, lf));
+            }
 
 
             sb.Append(lf);
