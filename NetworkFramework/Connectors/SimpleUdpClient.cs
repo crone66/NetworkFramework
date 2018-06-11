@@ -20,6 +20,9 @@ namespace NetworkFramework
         public event EventHandler<UDPMessageArgs> OnMessageReceived;
         public event EventHandler<ConnectionErrorArgs> OnException;
 
+        public IPEndPoint LocalEndPoint
+        { get { return listenEndPoint; } }
+
         public SimpleUdpClient(IPEndPoint listenEndPoint, IPEndPoint remoteEndPoint)
         {
             this.listenEndPoint = listenEndPoint;
@@ -83,11 +86,17 @@ namespace NetworkFramework
         /// <returns></returns>
         public async Task<bool> SendAsync(byte[] message)
         {
-            if(receiver != null && remoteEndPoint != null)
+            try
             {
-                return await receiver.SendAsync( message, message.Length, remoteEndPoint) == message.Length;
+                if (receiver != null && remoteEndPoint != null)
+                {
+                    return await receiver.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
+                }
             }
-
+            catch(Exception ex)
+            {
+                OnException?.Invoke(this, new ConnectionErrorArgs(ex, false));
+            }
             return false;
         }
 
@@ -99,11 +108,17 @@ namespace NetworkFramework
         /// <returns></returns>
         public async Task<bool> SendAsync(IPEndPoint remoteEndPoint, byte[] message)
         {
-            if (receiver != null)
+            try
             {
-                return await receiver.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
+                if (receiver != null)
+                {
+                    return await receiver.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
+                }
             }
-
+            catch(Exception ex)
+            {
+                OnException?.Invoke(this, new ConnectionErrorArgs(ex, false));
+            }
             return false;
         }
 
@@ -112,13 +127,21 @@ namespace NetworkFramework
         /// </summary>
         private async void ReadAsync()
         {
-            UdpReceiveResult result = await receiver.ReceiveAsync();
+            try
+            {
+                UdpReceiveResult result = await receiver.ReceiveAsync();
 
-            if(active)
-                ReadAsync();
+                if (active)
+                    ReadAsync();
 
-            if (result != null)
-                OnMessageReceived?.Invoke(this, new UDPMessageArgs(result.RemoteEndPoint, result.Buffer));
+                if (result != null)
+                    OnMessageReceived?.Invoke(this, new UDPMessageArgs(result.RemoteEndPoint, result.Buffer));
+            }
+            catch(Exception ex)
+            {
+                Stop();
+                OnException?.Invoke(this, new ConnectionErrorArgs(ex, true));
+            }
         }
     }
 }

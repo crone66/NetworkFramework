@@ -3,6 +3,7 @@
  * Date: 25.09.2017
  */
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -123,7 +124,7 @@ namespace NetworkFramework
             }
             catch(Exception ex)
             {
-                OnException?.Invoke(this, new ConnectionErrorArgs(ex, false));
+                OnException?.Invoke(this, new ConnectionErrorArgs(ex, ex is IOException));
                 return false;
             }
         }
@@ -142,7 +143,11 @@ namespace NetworkFramework
                     if(active)
                         ReceiveAsync();
 
-                    OnReceivedMessage?.Invoke(this, new MessageArgs(buffer));
+                    //Remove all unused indices;
+                    byte[] data = new byte[receivedBytes];
+                    Array.Copy(buffer, data, receivedBytes);
+
+                    OnReceivedMessage?.Invoke(this, new MessageArgs(data));
                 }
                 else
                 {
@@ -151,7 +156,7 @@ namespace NetworkFramework
             }
             catch(Exception ex)
             {
-                OnException?.Invoke(this, new ConnectionErrorArgs(ex, false));
+                OnException?.Invoke(this, new ConnectionErrorArgs(ex, true));
             }
         }
     }
