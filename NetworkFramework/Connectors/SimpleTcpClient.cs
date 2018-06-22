@@ -12,11 +12,11 @@ namespace NetworkFramework
 {
     public class SimpleTcpClient
     {
-        private bool active;
-        private TcpClient client;
-        private NetworkStream stream;
-        private int bufferLength;
-        private IPEndPoint remoteEndPoint;
+        protected bool active;
+        protected TcpClient client;
+        protected NetworkStream stream;
+        protected int bufferLength;
+        protected IPEndPoint remoteEndPoint;
 
         public event EventHandler<MessageArgs> OnReceivedMessage;
         public event EventHandler<ConnectionErrorArgs> OnException;
@@ -49,7 +49,7 @@ namespace NetworkFramework
         /// </summary>
         /// <param name="remoteEndPoint">Remote endpoint</param>
         /// <returns>Returns true on success</returns>
-        public bool Start(IPEndPoint remoteEndPoint = null)
+        public virtual bool Start(IPEndPoint remoteEndPoint = null)
         {
             if (!active)
             {
@@ -89,22 +89,29 @@ namespace NetworkFramework
         /// <summary>
         /// Stop the client and closes all streams (Can cause exceptions)
         /// </summary>
-        public void Stop()
+        public virtual void Stop()
         {
-            if (active)
+            try
             {
-                active = false;
-                try
+                if (active)
                 {
-                    client.Close();
-                    stream.Close();
+                    active = false;
+                    try
+                    {
+                        client.Close();
+                        stream.Close();
+                    }
+                    catch
+                    {
+                    }
+                    client = null;
+                    stream = null;
+                    OnDisconnect?.Invoke(this, EventArgs.Empty);
                 }
-                catch
-                {
-                }
-                client = null;
-                stream = null;
-                OnDisconnect?.Invoke(this, EventArgs.Empty);
+            }
+            catch
+            {
+                //Ignore errors while closing broken streams
             }
         }
 
@@ -113,26 +120,46 @@ namespace NetworkFramework
         /// </summary>
         /// <param name="message">Message as byte array</param>
         /// <returns>Returns true on success. (Indicates only that the message was successfully loaded into the network buffer!)</returns>
-        public async Task<bool> SendAsync(byte[] message)
+        public virtual async Task<bool> SendAsync(byte[] message)
         {
             try
             {
-                if(active && stream.CanWrite)
-                    await stream.WriteAsync(message, 0, message.Length);
-
-                return true;
+                if (active)
+                {
+                    if (message != null && message.Length > 0 && message.Length <= bufferLength)
+                    {
+                        if (active && stream.CanWrite)
+                        {
+                            await stream.WriteAsync(message, 0, message.Length);
+                            return true;
+                        }
+                        else
+                        {
+                            OnException?.Invoke(this, new ConnectionErrorArgs(new Exception("Socked cannot write for unknown reason!"), true));
+                        }
+                    }
+                    else
+                    {
+                        OnException?.Invoke(this, new ConnectionErrorArgs(new Exception("Invalid message! Message cannot be null and the length must be greater then zero and lower or equal to bufferLength"), true));
+                    }
+                }
+                else
+                {
+                    OnException?.Invoke(this, new ConnectionErrorArgs(new Exception("The Start method has to be called before you can send messages!"), true));
+                }
             }
             catch(Exception ex)
             {
+                Stop();
                 OnException?.Invoke(this, new ConnectionErrorArgs(ex, ex is IOException));
-                return false;
             }
+            return false;
         }
 
         /// <summary>
         /// Receiver methode runs in a async thread and calls it self when a message was received
         /// </summary>
-        private async void ReceiveAsync()
+        protected virtual async void ReceiveAsync()
         {
             try
             {
@@ -156,8 +183,24 @@ namespace NetworkFramework
             }
             catch(Exception ex)
             {
+                Stop();
                 OnException?.Invoke(this, new ConnectionErrorArgs(ex, true));
             }
+        }
+
+        protected virtual void InvokeOnException(ConnectionErrorArgs errorArgs)
+        {
+            OnException?.Invoke(this, errorArgs);
+        }
+
+        protected virtual void InvokeOnDisconnect()
+        {
+            OnDisconnect?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void InvokeOnReceivedMessage(MessageArgs messageArgs)
+        {
+            OnReceivedMessage?.Invoke(this, messageArgs);
         }
     }
 }

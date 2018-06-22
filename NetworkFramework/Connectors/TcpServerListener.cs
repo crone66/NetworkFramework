@@ -13,9 +13,9 @@ namespace NetworkFramework
     /// </summary>
     public class TcpServerListener
     {
-        private bool active;
-        private TcpListener listener;
-        private IPEndPoint localEndPoint;
+        protected bool active;
+        protected TcpListener listener;
+        protected IPEndPoint localEndPoint;
 
         public event EventHandler<NewConnectionArgs> OnConnectionAccepted;
         public event EventHandler<ConnectionErrorArgs> OnException;
@@ -30,7 +30,7 @@ namespace NetworkFramework
         /// </summary>
         /// <param name="localEndPoint"></param>
         /// <returns></returns>
-        public bool Start(IPEndPoint localEndPoint = null)
+        public virtual bool Start(IPEndPoint localEndPoint = null)
         {
             if (!active)
             {
@@ -74,7 +74,7 @@ namespace NetworkFramework
         /// <summary>
         /// Stops listening
         /// </summary>
-        public void Stop()
+        public virtual void Stop()
         {
             if(active)
             {
@@ -92,7 +92,7 @@ namespace NetworkFramework
         /// <summary>
         /// Listening methode calls itself when a new client was accepted
         /// </summary>
-        private async void Listen()
+        protected virtual async void Listen()
         {
             try
             {
@@ -110,6 +110,16 @@ namespace NetworkFramework
                 if (active)
                     Listen();
             }
+        }
+
+        protected virtual void InvokeOnException(ConnectionErrorArgs errorArgs)
+        {
+            OnException?.Invoke(this, errorArgs);
+        }
+
+        protected virtual void InvokeOnConnectionAccepted(NewConnectionArgs connectionArgs)
+        {
+            OnConnectionAccepted?.Invoke(this, connectionArgs);
         }
     }
 }

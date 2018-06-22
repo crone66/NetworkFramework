@@ -11,17 +11,19 @@ namespace NetworkFramework
 {
     public class SimpleUdpClient
     {
-        private bool active;
-        private UdpClient receiver;
+        protected bool active;
+        protected UdpClient receiver;
 
-        private IPEndPoint remoteEndPoint;
-        private IPEndPoint listenEndPoint;
+        protected IPEndPoint remoteEndPoint;
+        protected IPEndPoint listenEndPoint;
 
         public event EventHandler<UDPMessageArgs> OnMessageReceived;
         public event EventHandler<ConnectionErrorArgs> OnException;
 
         public IPEndPoint LocalEndPoint
-        { get { return listenEndPoint; } }
+        {
+            get { return listenEndPoint; }
+        }
 
         public SimpleUdpClient(IPEndPoint listenEndPoint, IPEndPoint remoteEndPoint)
         {
@@ -38,7 +40,7 @@ namespace NetworkFramework
         /// Starts Receiver
         /// </summary>
         /// <returns></returns>
-        public bool Start()
+        public virtual bool Start()
         {
             if (!active)
             {
@@ -63,7 +65,7 @@ namespace NetworkFramework
         /// <summary>
         /// Stops Receiver
         /// </summary>
-        public void Stop()
+        public virtual void Stop()
         {
             if (active)
             {
@@ -84,13 +86,31 @@ namespace NetworkFramework
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async Task<bool> SendAsync(byte[] message)
+        public virtual async Task<bool> SendAsync(byte[] message)
         {
             try
             {
-                if (receiver != null && remoteEndPoint != null)
+                if (active)
                 {
-                    return await receiver.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
+                    if (message != null && message.Length > 0)
+                    {
+                        if (receiver != null && remoteEndPoint != null)
+                        {
+                            return await receiver.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
+                        }
+                        else
+                        {
+                            OnException?.Invoke(this, new ConnectionErrorArgs(new NullReferenceException("The receiver udp client or remote EndPoint is null"), true));
+                        }
+                    }
+                    else
+                    {
+                        OnException?.Invoke(this, new ConnectionErrorArgs(new Exception("Invalid message! Message cannot be null and the length must be greater then zero and lower or equal to bufferLength"), true));
+                    }
+                }
+                else
+                {
+                    OnException?.Invoke(this, new ConnectionErrorArgs(new Exception("The Start method has to be called before you can send messages!"), true));
                 }
             }
             catch(Exception ex)
@@ -106,7 +126,7 @@ namespace NetworkFramework
         /// <param name="remoteEndPoint"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async Task<bool> SendAsync(IPEndPoint remoteEndPoint, byte[] message)
+        public virtual async Task<bool> SendAsync(IPEndPoint remoteEndPoint, byte[] message)
         {
             try
             {
@@ -125,7 +145,7 @@ namespace NetworkFramework
         /// <summary>
         /// Receives udp messages and calls itself again
         /// </summary>
-        private async void ReadAsync()
+        protected virtual async void ReadAsync()
         {
             try
             {
@@ -142,6 +162,16 @@ namespace NetworkFramework
                 Stop();
                 OnException?.Invoke(this, new ConnectionErrorArgs(ex, true));
             }
+        }
+
+        protected virtual void InvokeOnException(ConnectionErrorArgs errorArgs)
+        {
+            OnException?.Invoke(this, errorArgs);
+        }
+
+        protected virtual void InvokeOnReceivedMessage(UDPMessageArgs messageArgs)
+        {
+            OnMessageReceived?.Invoke(this, messageArgs);
         }
     }
 }
