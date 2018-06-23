@@ -424,6 +424,11 @@ namespace NetworkFramework.MessageConverter
 
         public static byte[] ConvertToByteArray(object command, params object[] arguments)
         {
+            return ConvertArrayToByteArray(command, arguments);
+        }
+
+        public static byte[] ConvertArrayToByteArray(object command, object[] arguments)
+        {
             if (command == null)
                 throw new NullReferenceException();
 

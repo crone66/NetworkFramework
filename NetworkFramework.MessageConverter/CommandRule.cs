@@ -59,7 +59,11 @@ namespace NetworkFramework.MessageConverter
             Type = RuleType.None;
         }
 
-
+        /// <summary>
+        /// Checks if the given command arguments are valid
+        /// </summary>
+        /// <param name="args">Command arguments object</param>
+        /// <returns>Returns true if the rule is valid</returns>
         public bool IsValidRule(CommandArgs args)
         {
             if(args.Command.Equals(Command))
