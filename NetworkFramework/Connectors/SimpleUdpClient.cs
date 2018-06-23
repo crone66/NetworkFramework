@@ -12,7 +12,8 @@ namespace NetworkFramework
     public class SimpleUdpClient
     {
         protected bool active;
-        protected UdpClient receiver;
+        protected int bufferLength;
+        protected UdpClient client;
 
         protected IPEndPoint remoteEndPoint;
         protected IPEndPoint listenEndPoint;
@@ -25,14 +26,16 @@ namespace NetworkFramework
             get { return listenEndPoint; }
         }
 
-        public SimpleUdpClient(IPEndPoint listenEndPoint, IPEndPoint remoteEndPoint)
+        public SimpleUdpClient(int bufferLength, IPEndPoint listenEndPoint, IPEndPoint remoteEndPoint)
         {
+            this.bufferLength = bufferLength;
             this.listenEndPoint = listenEndPoint;
             this.remoteEndPoint = remoteEndPoint;
         }
 
-        public SimpleUdpClient(IPEndPoint listenEndPoint)
+        public SimpleUdpClient(int bufferLength, IPEndPoint listenEndPoint)
         {
+            this.bufferLength = bufferLength;
             this.listenEndPoint = listenEndPoint;
         }
 
@@ -47,7 +50,7 @@ namespace NetworkFramework
                 active = true;
                 try
                 {
-                    receiver = new UdpClient(listenEndPoint);
+                    client = new UdpClient(listenEndPoint);
                     ReadAsync();
 
                     return true;
@@ -73,11 +76,11 @@ namespace NetworkFramework
 
                 try
                 {
-                    receiver.Close();
+                    client.Close();
                 }
                 catch
                 { }
-                receiver = null;
+                client = null;
             }
         }
 
@@ -88,15 +91,26 @@ namespace NetworkFramework
         /// <returns></returns>
         public virtual async Task<bool> SendAsync(byte[] message)
         {
+            return await SendAsync(message, remoteEndPoint);
+        }
+
+        /// <summary>
+        /// Send a message to server 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="remoteEndPoint">Receivers IP endpoint</param>
+        /// <returns></returns>
+        public virtual async Task<bool> SendAsync(byte[] message, IPEndPoint remoteEndPoint)
+        {
             try
             {
                 if (active)
                 {
-                    if (message != null && message.Length > 0)
+                    if (message != null && message.Length > 0 && message.Length <= bufferLength)
                     {
-                        if (receiver != null && remoteEndPoint != null)
+                        if (client != null && remoteEndPoint != null)
                         {
-                            return await receiver.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
+                            return await client.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
                         }
                         else
                         {
@@ -113,7 +127,7 @@ namespace NetworkFramework
                     OnException?.Invoke(this, new ConnectionErrorArgs(new Exception("The Start method has to be called before you can send messages!"), true));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 OnException?.Invoke(this, new ConnectionErrorArgs(ex, false));
             }
@@ -130,9 +144,9 @@ namespace NetworkFramework
         {
             try
             {
-                if (receiver != null)
+                if (client != null)
                 {
-                    return await receiver.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
+                    return await client.SendAsync(message, message.Length, remoteEndPoint) == message.Length;
                 }
             }
             catch(Exception ex)
@@ -149,7 +163,7 @@ namespace NetworkFramework
         {
             try
             {
-                UdpReceiveResult result = await receiver.ReceiveAsync();
+                UdpReceiveResult result = await client.ReceiveAsync();
 
                 if (active)
                     ReadAsync();
